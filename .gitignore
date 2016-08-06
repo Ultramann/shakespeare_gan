@@ -1,0 +1,3 @@
+clean_text/*
+dirty_text/*
+__pycache__
