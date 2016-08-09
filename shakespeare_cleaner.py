@@ -25,11 +25,14 @@ def clean_text(text_file):
 def transform_text(text):
     no_sections = re.sub(r'.*\n+=+', '', text)
     no_new_lines = re.sub(r'\n', ' ', no_sections)
-    no_caps = re.sub(r'[A-Z]{2,}\,*', '', no_new_lines)
+    no_tabs = re.sub(r'\t', '', no_new_lines)
+    no_numbers = re.sub('\d+', '', no_tabs)
+    no_caps = re.sub(r'[A-Z]{2,}\,*', '', no_numbers)
     no_double_dashes = re.sub(r'--', '.', no_caps)
     no_stage_directions = re.sub(r'\[.*?\]', '', no_double_dashes)
-    no_octothorp = re.sub(r'#', '', no_stage_directions)
-    return no_octothorp.lower()
+    no_octothorp = re.sub(r'#|\/', '', no_stage_directions)
+    no_extra_spaces = re.sub(r'[ ]{2,}', ' ', no_octothorp)
+    return no_extra_spaces.lower()
 
 
 def clean_spaces(text):

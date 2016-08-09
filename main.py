@@ -1,11 +1,16 @@
-from data_processing import load_shakespeare_sentences
-from modeling import make_models, ModelTrainer
+from data_processing import ShakespeareSentences, CharacterCoder
+from modeling import make_models, GanTrainer
 
 def run_train():
-    sentences = load_shakespeare_sentences()
-    models = make_models()
-    model_trainer = ModelTrainer(sentences, *models)
-    model_trainer.train(epochs=10, batch_size = 20)
+    sentences = ShakespeareSentences()
+    char_coder = CharacterCoder(sentences.chars)
+    noise_dimension = 100
+    models = make_models(noise_dimension,
+                         len(sentences.chars),
+                         sentences.max_chars)
+    model_trainer = GanTrainer(sentences, char_coder, noise_dimension, *models)
+    model_trainer.train(batch_size=20, nb_steps=100)
+    return model_trainer
 
 if __name__ == '__main__':
-    run_train()
+    mt = run_train()
