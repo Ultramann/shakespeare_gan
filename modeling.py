@@ -1,6 +1,6 @@
 from keras.layers import LSTM, TimeDistributed, Dense, Input
 from keras.models import Model
-from numpy import random
+import numpy as np
 
 def make_models(noise_dimension, char_dimension, max_chars):
     '''
@@ -69,29 +69,63 @@ class GanTrainer:
         self.gan = gan
         self.batch_size = None
 
+        self.gen_loss = []
+        self.gen_trained = []
+        self.dis_loss
+        self.dis_trained = []
+
     def train(self, batch_size, nb_steps):
-        self.batch_size = batch_size
+        evenize = lambda x: ((x + 1) // 2) * 2
+        self.batch_size = evenize(batch_size)
         for step in range(nb_steps):
             self._train_on_batch()
 
-    def _train_on_batch(self, sentences):
-        if self.gen_loss > 1:
-            self._train_gen(True)
-            self._train_dis(False)
-        elif self.dis_loss > 1:
-            self._train_dis(True)
-            self._train_gen(False)
+    def _train_on_batch(self):
+        if self.gen_loss[-1] > 1:
+            self._train_gen(update_weights=True)
+            self._train_dis(update_weights=False)
+        elif self.dis_loss[-1] > 1:
+            self._train_dis(update_weights=True)
+            self._train_gen(update_weights=False)
         else:
-            self._train_dis(True)
-            self._train_gen(True)
+            self._train_dis(update_weights=True)
+            self._train_gen(update_weights=True)
 
     def _train_gen(self, update_weights):
-       train_noise = random.random((self.batch_size, self.noise_dimension))
 
-    def _train_dis(update_weights):
+        train_noise = np.random.random((self.batch_size, self.noise_dimension))
+        train_target = np.ones(self.batch_size)
+
+        if update_weights:
+            current_loss = self.gen.train_on_batch(train_noise, train_target)
+            was_trained = True
+        else:
+            current_loss = self.gen.test_on_batch(train_noise, train_target)
+            was_trained = False
+
+        self.gen_loss.append(current_loss)
+        self.gen_trained.append(was_trained)
+
+    def _train_dis(self, update_weights):
+
+        train_text, train_target = self._get_dis_training_text()
+
+        if update_weights:
+            self._set_dis_trainability(True)
+            current_loss = self.dis.train_on_batch(train_text, train_target)
+            self._set_dis_trainability(False)
+            was_trained = True
+        else:
+            current_loss = self.dis.test_on_batch(train_text, train_target)
+            was_trained = False
+
+        self.dis_loss.append(current_loss)
+        self.dis_trained.append(was_trained)
+
+    def _get_dis_training_text(self):
         pass
 
-    def set_dis_trainability(self, ability):
-        self.dis.trainable = ability
+    def _set_dis_trainability(self, trainable):
+        self.dis.trainable = trainable
         for layer in self.dis.layers:
-            layer.trainable = ability
+            layer.trainable = trainable
