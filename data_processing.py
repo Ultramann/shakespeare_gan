@@ -5,15 +5,14 @@ from numpy.random import random_integers
 
 
 def load_file(file_path):
-    '''Helper function for loading contents at file path.'''
-
+    '''Helper function for loading contents at file path.
+    '''
     with open(file_path) as f:
         return f.read()
 
 
 class ShakespeareSentences:
-    '''
-    Class to simplify getting random batches of Shakespeare sentences.
+    '''Class to simplify getting random batches of Shakespeare sentences.
     '''
     def __init__(self, text_folder='clean_text/', end_token='#'):
         self.end_token = end_token
@@ -29,9 +28,7 @@ class ShakespeareSentences:
     def _get_sentences(self, text_folder):
 
         def sentenciate(text_path):
-            '''
-            Helper function for making sentences from text in
-            file at text_path.
+            ''' Helper function for making sentences from text in file at text_path.
             '''
             text = load_file(os.path.join(text_folder, text_path))
             sentences_n_punct = re.split(r'(\.|\?|\!)', text)
@@ -53,14 +50,14 @@ class ShakespeareSentences:
         Args:
             batch_size (int): Number of random sentences to get
         '''
-        random_idxs = random_integers(0, self.total_sentences, batch_size)
+        random_idxs = random_integers(0, self.total_sentences-1, batch_size)
         random_sentences = self.sentences[random_idxs]
         return random_sentences
 
 
 class CharacterCoder:
-    '''Class for (en/de)coding characters to/from one-hot vector representation.'''
-
+    '''Class for (en/de)coding characters to/from one-hot vector representation.
+    '''
     def __init__(self, chars):
         '''
         Args:
